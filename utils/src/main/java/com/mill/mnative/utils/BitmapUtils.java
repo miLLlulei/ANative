@@ -8,6 +8,7 @@ import android.os.Environment;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class BitmapUtils {
 
@@ -45,6 +46,58 @@ public class BitmapUtils {
             } catch (OutOfMemoryError e) {
                 try {
                     return BitmapFactory.decodeFile(dst.getPath(), opts);
+                } catch (OutOfMemoryError e2) {
+                    e2.printStackTrace();
+                }
+            }
+        }
+        return null;
+    }
+
+    public static Bitmap getBitmapFromBytes(byte[] dst, int width, int height) {
+        if (null != dst) {
+            BitmapFactory.Options opts = null;
+            if (width > 0 && height > 0) {
+                opts = new BitmapFactory.Options();
+                opts.inJustDecodeBounds = true;
+                BitmapFactory.decodeByteArray(dst, 0, dst.length, opts);
+                final int minSideLength = Math.min(width, height);
+                opts.inSampleSize = computeSampleSize(opts, minSideLength, width * height);
+                opts.inJustDecodeBounds = false;
+                opts.inInputShareable = true;
+                opts.inPurgeable = true;
+            }
+            try {
+                return BitmapFactory.decodeByteArray(dst, 0, dst.length, opts);
+            } catch (OutOfMemoryError e) {
+                try {
+                    return BitmapFactory.decodeByteArray(dst, 0, dst.length, opts);
+                } catch (OutOfMemoryError e2) {
+                    e2.printStackTrace();
+                }
+            }
+        }
+        return null;
+    }
+
+    public static Bitmap getBitmapFromInputStream(InputStream dst, int width, int height) {
+        if (null != dst) {
+            BitmapFactory.Options opts = null;
+            if (width > 0 && height > 0) {
+                opts = new BitmapFactory.Options();
+                opts.inJustDecodeBounds = true;
+                BitmapFactory.decodeStream(dst, null, opts);
+                final int minSideLength = Math.min(width, height);
+                opts.inSampleSize = computeSampleSize(opts, minSideLength, width * height);
+                opts.inJustDecodeBounds = false;
+                opts.inInputShareable = true;
+                opts.inPurgeable = true;
+            }
+            try {
+                return BitmapFactory.decodeStream(dst, null, opts);
+            } catch (OutOfMemoryError e) {
+                try {
+                    return BitmapFactory.decodeStream(dst, null, opts);
                 } catch (OutOfMemoryError e2) {
                     e2.printStackTrace();
                 }

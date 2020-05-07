@@ -4,12 +4,12 @@ package com.mill.mnative.imageload;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Environment;
 import android.util.Log;
 
-import com.mill.mnative.utils.BitmapUtils;
+import com.mill.mnative.imageload.resource.Resource;
+import com.mill.mnative.imageload.resource.ResourceUtils;
 import com.mill.mnative.utils.FileUtils;
 
 import java.io.File;
@@ -45,7 +45,7 @@ public class DiskCache {
         return this.mSize;
     }
 
-    public Bitmap get(String key) {
+    public File get(String key) {
         if (key != null) {
             getDiskCurrentSize();
             File file = new File(getDiskCacheDir(mContext), key);
@@ -55,7 +55,7 @@ public class DiskCache {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                return BitmapUtils.getBitmapFromFile(file, 720, 1280);
+                return file;
             }
         }
         return null;

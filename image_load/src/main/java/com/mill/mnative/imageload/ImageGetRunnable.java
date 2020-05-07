@@ -1,10 +1,11 @@
 package com.mill.mnative.imageload;
 
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.Log;
 
+import com.mill.mnative.imageload.resource.ImageHeaderParser;
+import com.mill.mnative.imageload.resource.Resource;
+import com.mill.mnative.imageload.resource.ResourceUtils;
 import com.mill.mnative.utils.FileUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -17,19 +18,21 @@ public class ImageGetRunnable implements Runnable {
     private ImageRequest mRequest;
     private MemoryCache mMemoryCache;
     private DiskCache mDiskCache;
+    private ImageHeaderParser mHeaderParser;
     private ImageDispatch mImageDispatch;
 
-    public ImageGetRunnable(ImageRequest request, MemoryCache memoryCache, DiskCache diskCache, ImageDispatch imageDispatch) {
-        this.mRequest = request;
-        this.mMemoryCache = memoryCache;
-        this.mDiskCache = diskCache;
-        this.mImageDispatch = imageDispatch;
+    public ImageGetRunnable(ImageRequest mRequest, MemoryCache mMemoryCache, DiskCache mDiskCache, ImageHeaderParser mHeaderParser, ImageDispatch mImageDispatch) {
+        this.mRequest = mRequest;
+        this.mMemoryCache = mMemoryCache;
+        this.mDiskCache = mDiskCache;
+        this.mHeaderParser = mHeaderParser;
+        this.mImageDispatch = mImageDispatch;
     }
 
     @Override
     public void run() {
         String key = mRequest.getKey();
-        Bitmap result = getFromMemory(key);
+        Resource result = getFromMemory(key);
         if (result != null) {
             if (ImageLoaderImp.isDebug) {
                 Log.i(ImageLoaderImp.TAG, "image get run: Memory " + mRequest.url + " " + result);
@@ -48,7 +51,7 @@ public class ImageGetRunnable implements Runnable {
             try {
                 byte[] bytes = getFromDownload(mRequest.url);
                 if (bytes != null && bytes.length > 0) {
-                    result = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    result = ResourceUtils.getResource(bytes, mHeaderParser);
                     putToMemory(key, result);
                     putToDisk(key, bytes);
                     if (ImageLoaderImp.isDebug) {
@@ -63,23 +66,24 @@ public class ImageGetRunnable implements Runnable {
             }
         }
         if (result != null) {
-//            if (ImageLoaderImp.isDebug) {
-//                Log.i(ImageLoaderImp.TAG, "image get run: ok " + mRequest.url + " " + result);
-//            }
             mImageDispatch.notifySuccess(key, result);
+        } else {
+            mImageDispatch.notifyFail(key, "create bitmap error");
         }
     }
 
-    private Bitmap getFromMemory(String key) {
+    private Resource getFromMemory(String key) {
         return mMemoryCache.get(key);
     }
 
-    private void putToMemory(String key, Bitmap bytes) {
-        mMemoryCache.put(key, bytes);
+    private void putToMemory(String key, Resource bytes) {
+        if (bytes != null) {
+            mMemoryCache.put(key, bytes);
+        }
     }
 
-    private Bitmap getFromDisk(String key) {
-        return mDiskCache.get(key);
+    private Resource getFromDisk(String key) {
+        return ResourceUtils.getResource(mDiskCache.get(key), mHeaderParser);
     }
 
     private void putToDisk(String key, byte[] obj) {

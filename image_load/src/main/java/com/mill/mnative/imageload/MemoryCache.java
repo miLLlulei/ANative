@@ -1,18 +1,17 @@
 package com.mill.mnative.imageload;
 
-import android.graphics.Bitmap;
 import android.util.LruCache;
 
-import com.mill.mnative.utils.BitmapUtils;
+import com.mill.mnative.imageload.resource.Resource;
 
-public class MemoryCache extends LruCache<String, Bitmap> {
+public class MemoryCache extends LruCache<String, Resource> {
 
     public MemoryCache(int maxSize) {
         super(maxSize);
     }
 
     @Override
-    protected int sizeOf(String key, Bitmap value) {
-        return BitmapUtils.getBitmapSize(value);
+    protected int sizeOf(String key, Resource value) {
+        return value.getSize();
     }
 }

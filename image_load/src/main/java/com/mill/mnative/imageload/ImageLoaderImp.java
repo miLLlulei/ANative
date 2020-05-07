@@ -5,12 +5,18 @@ import android.graphics.Bitmap;
 import android.util.Log;
 import android.widget.ImageView;
 
+import com.mill.mnative.imageload.resource.DefaultImageHeaderParser;
+import com.mill.mnative.imageload.resource.ImageHeaderParser;
+import com.mill.mnative.imageload.resource.Resource;
+import com.mill.mnative.utils.BitmapUtils;
 import com.mill.mnative.utils.FileUtils;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import pl.droidsonroids.gif.GifDrawable;
 
 public class ImageLoaderImp {
     public static final String TAG = "ImageLoaderImp";
@@ -55,7 +61,8 @@ public class ImageLoaderImp {
             if (ImageLoaderImp.isDebug) {
                 Log.i(ImageLoaderImp.TAG, "MemoryCache size: " + FileUtils.formatFileSize(cacheSize) + " DiskCache size: " + FileUtils.formatFileSize(ImageLoadConfig.MAX_DISK_SIZE));
             }
-            mDispatch = new ImageDispatch(mExecutor, mMemoryCache, mDiskCache);
+            ImageHeaderParser mHeaderParser = new DefaultImageHeaderParser();
+            mDispatch = new ImageDispatch(mExecutor, mMemoryCache, mDiskCache, mHeaderParser);
         }
     }
 
@@ -63,31 +70,51 @@ public class ImageLoaderImp {
         return this.mContext;
     }
 
-    public void setImageUrl(final ImageView imageView, String url) {
-        cancel(imageView);
-        ImageRequest request = new ImageRequest();
-        request.tag = imageView;
-        request.url = url;
-        request.callback = new ImageCallback() {
+    public void setImageUrl(final ImageView imageView, final String url) {
+        Utils.getSingleExecutorService().execute(new Runnable() {
             @Override
-            public void onImageSuccess(String url, Bitmap result) {
-                imageView.setImageBitmap(result);
-            }
+            public void run() {
+                cancel(imageView);
+                final ImageRequest request = new ImageRequest();
+                request.tag = imageView;
+                request.url = url;
+                request.callback = new ImageCallback() {
+                    @Override
+                    public void onImageSuccess(String url, Resource result) {
+                        if (ImageLoaderImp.isDebug) {
+//                            Log.i(ImageLoaderImp.TAG, "setImageUrl: " + url + " " + result);
+                        }
+                        if (result.getResourceClass() == Bitmap.class) {
+                            imageView.setImageBitmap((Bitmap) result.get());
+                        } else if (result.getResourceClass() == GifDrawable.class) {
+                            imageView.setImageDrawable((GifDrawable) result.get());
+                        }
+                    }
 
-            @Override
-            public void onImageFail(String url, String error) {
-                imageView.setImageBitmap(null);
+                    @Override
+                    public void onImageFail(String url, String error) {
+                        if (ImageLoaderImp.isDebug) {
+//                            Log.i(ImageLoaderImp.TAG, "setImageUrl: " + url + " " + error);
+                        }
+                        imageView.setImageBitmap(null);
+                    }
+                };
+                mDispatch.loadImage(request);
             }
-        };
-        mDispatch.loadImage(request);
+        });
     }
 
-    public void getBitmap(Object tag, String url, ImageCallback callback) {
-        ImageRequest request = new ImageRequest();
-        request.tag = tag;
-        request.url = url;
-        request.callback = callback;
-        mDispatch.loadImage(request);
+    public void getBitmap(final Object tag, final String url, final ImageCallback callback) {
+        Utils.getSingleExecutorService().execute(new Runnable() {
+            @Override
+            public void run() {
+                ImageRequest request = new ImageRequest();
+                request.tag = tag;
+                request.url = url;
+                request.callback = callback;
+                mDispatch.loadImage(request);
+            }
+        });
     }
 
     public void cancel(Object tag) {

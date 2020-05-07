@@ -1,10 +1,11 @@
 package com.mill.mnative.imageload;
 
 
-import android.graphics.Bitmap;
 import android.text.TextUtils;
 import android.view.View;
 
+import com.mill.mnative.imageload.resource.ImageHeaderParser;
+import com.mill.mnative.imageload.resource.Resource;
 import com.mill.mnative.utils.Md5Utils;
 import com.mill.mnative.utils.ThreadUtils;
 
@@ -16,18 +17,19 @@ import java.util.concurrent.Future;
 
 public class ImageDispatch {
     public List<ImageRequest> mRequestList = new ArrayList<>();
-    private ExecutorService mSingleExecutor = Utils.getSingleExecutorService();
     private ExecutorService mExecutor;
     private MemoryCache mMemoryCache;
     private DiskCache mDiskCache;
+    private ImageHeaderParser mHeaderParser;
 
-    public ImageDispatch(ExecutorService mExecutor, MemoryCache mMemoryCache, DiskCache mDiskCache) {
+    public ImageDispatch(ExecutorService mExecutor, MemoryCache mMemoryCache, DiskCache mDiskCache, ImageHeaderParser mHeaderParser) {
         this.mExecutor = mExecutor;
         this.mMemoryCache = mMemoryCache;
         this.mDiskCache = mDiskCache;
+        this.mHeaderParser = mHeaderParser;
     }
 
-    public void notifySuccess(final String key, final Bitmap bitmap) {
+    public void notifySuccess(final String key, final Resource bitmap) {
         synchronized (ImageDispatch.class) {
             Iterator<ImageRequest> it = mRequestList.iterator();
             while (it.hasNext()) {
@@ -141,20 +143,15 @@ public class ImageDispatch {
     }
 
     public ImageRequest loadImage(final ImageRequest request) {
-        mSingleExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                ImageRequest first = getFirstImageRequest(request.getKey());
-                Future future = null;
-                if (first != null) {
-                    future = first.future;
-                } else {
-                    future = mExecutor.submit(new ImageGetRunnable(request, mMemoryCache, mDiskCache, ImageDispatch.this));
-                }
-                request.future = future;
-                addRequest(request);
-            }
-        });
+        ImageRequest first = getFirstImageRequest(request.getKey());
+        Future future = null;
+        if (first != null) {
+            future = first.future;
+        } else {
+            future = mExecutor.submit(new ImageGetRunnable(request, mMemoryCache, mDiskCache, mHeaderParser, ImageDispatch.this));
+        }
+        request.future = future;
+        addRequest(request);
         return request;
     }
 }
