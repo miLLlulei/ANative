@@ -97,7 +97,7 @@ public class ConnectRunnable implements Runnable {
         BufferedReader reader = null;
         try {
             if (HttpClientImp.isDebug) {
-                Log.d(HttpClientImp.TAG, "Request: " + mRequest.toString());
+                Log.i(HttpClientImp.TAG, "Request: " + mRequest.toString());
             }
             URL url = new URL(mRequest.url);
             connection = (HttpURLConnection) url.openConnection();
@@ -123,24 +123,18 @@ public class ConnectRunnable implements Runnable {
             }
 
             if (HttpClientImp.isDebug) {
-                Log.d(HttpClientImp.TAG, "response: " + response.toString());
+                Log.i(HttpClientImp.TAG, "response: " + response.toString());
             }
             if (connection.getResponseCode() < 400) {
-                if (mRequest.callback != null) {
-                    mRequest.callback.onNetSuccess(response.toString());
-                }
+                mDispatch.notifySuccess(mRequest, response.toString());
             } else {
-                if (mRequest.callback != null) {
-                    mRequest.callback.onNetFail("net error");
-                }
+                mDispatch.notifyFail(mRequest, "net error");
             }
         } catch (Exception e) {
             if (HttpClientImp.isDebug) {
-                Log.d(HttpClientImp.TAG, "response error" + e.toString());
+                Log.i(HttpClientImp.TAG, "response error" + e.toString());
             }
-            if (mRequest.callback != null) {
-                mRequest.callback.onNetFail("net error" + e.toString());
-            }
+            mDispatch.notifyFail(mRequest, "net error" + e.toString());
         } finally {
             if (reader != null) {
                 try {

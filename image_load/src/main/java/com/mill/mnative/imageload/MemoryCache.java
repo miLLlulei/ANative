@@ -13,6 +13,6 @@ public class MemoryCache extends LruCache<String, Bitmap> {
 
     @Override
     protected int sizeOf(String key, Bitmap value) {
-        return BitmapUtils.getBitmapSize(value) / 1024;
+        return BitmapUtils.getBitmapSize(value);
     }
 }

@@ -1,9 +1,6 @@
 package com.mill.mnative.net;
 
 
-import android.graphics.Bitmap;
-import android.text.TextUtils;
-
 import com.mill.mnative.utils.ThreadUtils;
 
 import java.util.ArrayList;
@@ -47,24 +44,28 @@ public class ConnectDispatch {
     }
 
     public void addRequest(Request request) {
-        if (!mRequestList.contains(request)) {
+        synchronized (ConnectDispatch.class) {
             mRequestList.add(request);
         }
     }
 
     public void removeRequest(Request request) {
-        mRequestList.remove(request);
+        synchronized (ConnectDispatch.class) {
+            mRequestList.remove(request);
+        }
     }
 
     public void cancel(Object tag) {
-        if (tag != null) {
-            if (!mRequestList.isEmpty()) {
-                Iterator<Request> it = mRequestList.iterator();
-                while (it.hasNext()) {
-                    Request request = it.next();
-                    if (request.tag == tag) {
-                        cancel(request, false);
-                        it.remove();
+        synchronized (ConnectDispatch.class) {
+            if (tag != null) {
+                if (!mRequestList.isEmpty()) {
+                    Iterator<Request> it = mRequestList.iterator();
+                    while (it.hasNext()) {
+                        Request request = it.next();
+                        if (request.tag == tag) {
+                            cancel(request, false);
+                            it.remove();
+                        }
                     }
                 }
             }
@@ -86,7 +87,7 @@ public class ConnectDispatch {
         request.callback = null;
         request.future = null;
         if (removeFromList) {
-            mRequestList.remove(request);
+            removeRequest(request);
         }
     }
 

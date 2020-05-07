@@ -52,7 +52,7 @@ public class ImageLoaderImp {
                 }
             });
             DiskCache mDiskCache = new DiskCache(mContext, ImageLoadConfig.MAX_DISK_SIZE);
-            int maxCache = (int) (Runtime.getRuntime().maxMemory() / 1024);
+            int maxCache = (int) (Runtime.getRuntime().maxMemory());
             int cacheSize = maxCache / 8;
             MemoryCache mMemoryCache = new MemoryCache(cacheSize);
             if (ImageLoaderImp.isDebug) {

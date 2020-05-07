@@ -94,7 +94,7 @@ public class MainActivity extends Activity {
     public void loadData() {
         Map<String, String> params = new HashMap<>();
         params.put("page", String.valueOf(page));
-        HttpClientImp.getInstance().getAsync(this, "http://test.appapi.joyme.com/Recommend/topic?platform=1", params, new NetCallback() {
+        HttpClientImp.getInstance().postAsync(this, "http://test.appapi.joyme.com/Recommend/topic?platform=1", params, new NetCallback() {
             @Override
             public void onNetSuccess(String response) {
                 page++;

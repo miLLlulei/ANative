@@ -8,6 +8,7 @@
         android:label="@string/app_name"
         android:name="com.mill.mnative.BaseApplication"
         android:supportsRtl="false"
+        android:largeHeap="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
             <intent-filter>
