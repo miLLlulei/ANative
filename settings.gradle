@@ -1,0 +1,5 @@
+rootProject.name='Native'
+include ':app'
+include ':utils'
+include ':net'
+include ':image_load'
