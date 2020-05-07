@@ -136,6 +136,7 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         ImageLoaderImp.getInstance().cancel(this);
         HttpClientImp.getInstance().cancel(this);
+//        ImageLoaderImp.getInstance().clearAllCache();
         super.onDestroy();
     }
 

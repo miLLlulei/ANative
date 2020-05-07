@@ -131,6 +131,7 @@ public class ImageDispatch {
 
     public void clearAllCache() {
         mMemoryCache.evictAll();
+        mDiskCache.evictAll();
     }
 
     public void clearCache(String url) {

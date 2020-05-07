@@ -1,13 +1,11 @@
 package com.mill.mnative.imageload;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 import android.widget.ImageView;
 
 import com.mill.mnative.utils.FileUtils;
-import com.mill.mnative.utils.MemoryInfoUtils;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,10 +14,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ImageLoaderImp {
     public static final String TAG = "ImageLoaderImp";
+    public static final boolean isDebug = true;
 
-    public static volatile ImageLoaderImp sInstance;
-    public static boolean isDebug = true;
-
+    private static volatile ImageLoaderImp sInstance;
     private Context mContext;
     private ImageDispatch mDispatch;
 
@@ -101,7 +98,7 @@ public class ImageLoaderImp {
         mDispatch.cancel(request, false, true);
     }
 
-    public void clearCache() {
-
+    public void clearAllCache() {
+        mDispatch.clearAllCache();
     }
 }
