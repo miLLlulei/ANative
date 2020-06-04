@@ -1,17 +1,17 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion COMPILE_SDK_VERSION as int
     buildToolsVersion BUILD_TOOLS_VERSION
 
     defaultConfig {
-        applicationId "com.mill.mnative"
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
     }
 
     buildTypes {
@@ -25,18 +25,9 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(":utils")
+
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'
-    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
-    debugImplementation 'com.github.markzhai:blockcanary-android:1.5.0'
-    releaseImplementation 'com.github.markzhai:blockcanary-no-op:1.5.0'
-
-
-    implementation project(":download")
-    implementation project(":image_load")
-    implementation project(":net")
-    implementation project(":utils")
 }

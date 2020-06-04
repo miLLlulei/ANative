@@ -8,12 +8,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.util.List;
 
 public class FileUtils {
     private static final String TAG = "FileUtil";
@@ -259,5 +261,67 @@ public class FileUtils {
         }
         // 删除当前目录
         return dirFile.delete();
+    }
+
+    public static long getFileLen(String file) {
+        if (file == null)
+            return 0;
+        File f = new File(file);
+        return f.length();
+    }
+
+    public static boolean IsFileExist(String file) {
+        if (TextUtils.isEmpty(file)) {
+            return false;
+        }
+        File f = new File(file);
+        return f.exists();
+    }
+
+    public static boolean mergeTempFile(List<String> tempPaths, String savePath, boolean deleteTemp) {
+        if (tempPaths != null && !tempPaths.isEmpty()) {
+            BufferedInputStream bis = null;
+            BufferedOutputStream bos = null;
+            try {
+                bos = new BufferedOutputStream(new FileOutputStream(savePath), DEFAULT_BUFFER_SIZE);
+                for (String temp : tempPaths) {
+                    try {
+                        bis = new BufferedInputStream(new FileInputStream(temp), DEFAULT_BUFFER_SIZE);
+                        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+                        int len;
+                        while ((len = bis.read(buffer, 0, DEFAULT_BUFFER_SIZE)) != -1) {
+                            bos.write(buffer, 0, len);
+                        }
+                        bos.flush();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        try {
+                            if (bis != null) {
+                                bis.close();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (deleteTemp) {
+                        deleteFile(temp);
+                    }
+                }
+                bos.flush();
+                return true;
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    if (bos != null) {
+                        bos.close();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return false;
     }
 }

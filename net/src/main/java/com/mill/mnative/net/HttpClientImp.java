@@ -25,7 +25,7 @@ public class HttpClientImp {
     }
 
     private HttpClientImp() {
-        ExecutorService mExecutor = Executors.newFixedThreadPool(3, new ThreadFactory() {
+        ExecutorService mExecutor = Executors.newFixedThreadPool(2, new ThreadFactory() {
             private final AtomicInteger mThreadId = new AtomicInteger(0);
 
             @Override

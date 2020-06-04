@@ -9,15 +9,16 @@ import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
+import com.mill.mnative.download.BaseDownloadBean;
+import com.mill.mnative.download.BaseDownloadTask;
+import com.mill.mnative.download.DownloadMgr;
 import com.mill.mnative.imageload.ImageLoaderImp;
 import com.mill.mnative.net.HttpClientImp;
 import com.mill.mnative.net.NetCallback;
 
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -36,13 +37,42 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ImageLoaderImp.getInstance().init(this);
+        BaseDownloadBean info = null;
+        String id = null;
+        info = new BaseDownloadBean();
+        info.downloadUrl = "http://upload.test1.mobilem.360.cn/2020521/app05210942.apk";
+        info.fouceReDownload = false;
+        DownloadMgr.getInstance().startDownload(info);
+
+        info = new BaseDownloadBean();
+        info.downloadUrl = "http://upload.test1.mobilem.360.cn/2020521/app05210942.apk";
+        info.fouceReDownload = true;
+        id = DownloadMgr.getInstance().startDownload(info);
+
+        info = new BaseDownloadBean();
+        info.downloadUrl = "http://upload.test1.mobilem.360.cn/2020513/app-release_flutterso.apk";
+        info.fouceReDownload = false;
+        DownloadMgr.getInstance().startDownload(info);
+
+        info = new BaseDownloadBean();
+        info.downloadUrl = "http://upload.test1.mobilem.360.cn/2020513/app-release_flutterso.apk";
+        info.fouceReDownload = true;
+        DownloadMgr.getInstance().startDownload(info);
 
         ImageLoaderImp.getInstance().setImageUrl((ImageView) findViewById(R.id.iv), "https://img95.699pic.com/photo/50055/5642.jpg_wh860.jpg");
         ImageLoaderImp.getInstance().setImageUrl((ImageView) findViewById(R.id.iv2), "https://img95.699pic.com/photo/40011/0709.jpg_wh860.jpg");
         ImageLoaderImp.getInstance().setImageUrl((ImageView) findViewById(R.id.iv2), "https://upfile2.asqql.com/upfile/2009pasdfasdfic2009s305985-ts/gif_spic/2019-12/2019122712445225545.gif");
 
+
+        DownloadMgr.getInstance().pauseDownload(id);
+
         lv = findViewById(R.id.lv);
+        lv.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+            }
+        }, 1000);
+
         lv.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView view, int scrollState) {

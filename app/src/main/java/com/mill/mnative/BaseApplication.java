@@ -6,8 +6,9 @@ import android.content.Context;
 
 import com.github.moduth.blockcanary.BlockCanary;
 import com.github.moduth.blockcanary.BlockCanaryContext;
+import com.mill.mnative.download.DownloadMgr;
+import com.mill.mnative.imageload.ImageLoaderImp;
 import com.mill.mnative.utils.ContextUtils;
-import com.mill.mnative.utils.DeviceUtils;
 import com.mill.mnative.utils.LogUtils;
 import com.squareup.leakcanary.LeakCanary;
 
@@ -26,6 +27,8 @@ public class BaseApplication extends Application {
     public void onCreate() {
         leakBlockCanary();
         super.onCreate();
+        DownloadMgr.getInstance().init(this, LogUtils.isDebug());
+        ImageLoaderImp.getInstance().init(this);
     }
 
     private void leakBlockCanary() {
