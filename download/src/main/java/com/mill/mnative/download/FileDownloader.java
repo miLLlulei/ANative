@@ -14,7 +14,7 @@ public class FileDownloader {
         private final AtomicInteger mCount = new AtomicInteger(1);
 
         public Thread newThread(Runnable r) {
-            return new Thread(r, "DownloadTask #" + mCount.getAndIncrement());
+            return new Thread(r, "FileDownloader #" + mCount.getAndIncrement());
         }
     });
     private Map<String, BaseDownloadTask> mTaskMap = new HashMap<>();

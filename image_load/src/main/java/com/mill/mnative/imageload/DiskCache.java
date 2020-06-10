@@ -11,6 +11,7 @@ import android.util.Log;
 import com.mill.mnative.imageload.resource.Resource;
 import com.mill.mnative.imageload.resource.ResourceUtils;
 import com.mill.mnative.utils.FileUtils;
+import com.mill.mnative.utils.LooperHandlerThread;
 
 import java.io.File;
 
@@ -22,7 +23,7 @@ public class DiskCache {
     public DiskCache(Context context, int maxSize) {
         this.mContext = context;
         this.mMaxSize = maxSize;
-        Utils.getSingleExecutorService().execute(new Runnable() {
+        LooperHandlerThread.getGlobalThread().post(new Runnable() {
             @Override
             public void run() {
                 DiskCache.this.mSize = getDiskCurrentSize();

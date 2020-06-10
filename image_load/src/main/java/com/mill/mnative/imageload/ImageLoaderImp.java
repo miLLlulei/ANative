@@ -10,6 +10,7 @@ import com.mill.mnative.imageload.resource.ImageHeaderParser;
 import com.mill.mnative.imageload.resource.Resource;
 import com.mill.mnative.utils.BitmapUtils;
 import com.mill.mnative.utils.FileUtils;
+import com.mill.mnative.utils.LooperHandlerThread;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -71,7 +72,7 @@ public class ImageLoaderImp {
     }
 
     public void setImageUrl(final ImageView imageView, final String url) {
-        Utils.getSingleExecutorService().execute(new Runnable() {
+        LooperHandlerThread.getGlobalThread().post(new Runnable() {
             @Override
             public void run() {
                 cancel(imageView);
@@ -105,7 +106,7 @@ public class ImageLoaderImp {
     }
 
     public void getBitmap(final Object tag, final String url, final ImageCallback callback) {
-        Utils.getSingleExecutorService().execute(new Runnable() {
+        LooperHandlerThread.getGlobalThread().post(new Runnable() {
             @Override
             public void run() {
                 ImageRequest request = new ImageRequest();
@@ -127,5 +128,9 @@ public class ImageLoaderImp {
 
     public void clearAllCache() {
         mDispatch.clearAllCache();
+    }
+
+    public void onTerminate() {
+        mDispatch.clearMemoryCache();
     }
 }

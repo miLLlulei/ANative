@@ -69,17 +69,33 @@ public class BaseDownloadTask implements Runnable {
             return;
         }
         mTotalBytes = getTotalLength(mUrl);
-        if (mTotalBytes <= 0) {
+        if (mTotalBytes <= 10 * 1024 * 1024) {
+            // 小于 10m 的文件，不用 分块下载；
             synchronized (BaseDownloadTask.class) {
-                BaseChunkTask chunkTask = new BaseChunkTask(mUrl, mSavePath, 0, 0, mForceReDownload, mAutoRetryCountMax, mHeader, mListener);
+                BaseChunkTask chunkTask = new BaseChunkTask(mUrl, mSavePath, 0, 0, mForceReDownload, mAutoRetryCountMax, mHeader, new FileDownloadSampleListener() {
+                    @Override
+                    protected void completed(BaseDownloadTask task) {
+                        BaseDownloadTask.this.completed(BaseDownloadTask.this, task.mTotalBytes);
+                    }
+
+                    @Override
+                    protected void progress(BaseDownloadTask task, int soFarBytes, int totalBytes) throws RuntimeException {
+                        BaseDownloadTask.this.progress(BaseDownloadTask.this, soFarBytes, totalBytes);
+                    }
+
+                    @Override
+                    protected void error(BaseDownloadTask task, Throwable e) {
+                        BaseDownloadTask.this.error(BaseDownloadTask.this, e);
+                    }
+                });
                 chunkTask.mStatus = mStatus;
                 chunkTask.run();
             }
         } else {
-            int count = 3;
+            int count = FileDownloader.CHUNK_COUNT;
             for (int i = 0; i < count; i++) {
                 final int inval = mTotalBytes / 3;
-                final int start = inval * i;
+                final int start = inval * i + (i == 0 ? 0 : 1);
                 final int end = i == count - 1 ? mTotalBytes : inval * (i + 1);
                 final String tempPath = mSavePath + "." + i;
                 BaseChunkTask chunkTask = new BaseChunkTask(mUrl, tempPath, start, end, mForceReDownload, mAutoRetryCountMax, mHeader, new FileDownloadSampleListener() {
@@ -98,14 +114,14 @@ public class BaseDownloadTask implements Runnable {
                         if (isComplited) {
                             boolean merge = FileUtils.mergeTempFile(tempPaths, mSavePath, true);
                             if (merge) {
-                                BaseDownloadTask.this.completed(BaseDownloadTask.this, getChunkTotalBytes());
+                                BaseDownloadTask.this.completed(BaseDownloadTask.this, BaseDownloadTask.this.getChunkTotalBytes());
                             }
                         }
                     }
 
                     @Override
                     protected void progress(BaseDownloadTask task, int soFarBytes, int totalBytes) throws RuntimeException {
-                        BaseDownloadTask.this.progress(BaseDownloadTask.this, soFarBytes, totalBytes);
+                        BaseDownloadTask.this.progress(BaseDownloadTask.this, BaseDownloadTask.this.getChunkCurBytes(), BaseDownloadTask.this.getChunkTotalBytes());
                     }
 
                     @Override
@@ -124,8 +140,8 @@ public class BaseDownloadTask implements Runnable {
 
     public void progress(BaseDownloadTask task, int cur, int total) throws RuntimeException {
         mStatus = FileDownloadStatus.progress;
-        mCurBytes = getChunkCurBytes();
-        mTotalBytes = getChunkTotalBytes();
+        mCurBytes = cur;
+        mTotalBytes = total;
         if (mListener != null) {
             mListener.progress(task, mCurBytes, mTotalBytes);
         }

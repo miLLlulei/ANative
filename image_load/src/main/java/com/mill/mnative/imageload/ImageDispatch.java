@@ -136,6 +136,10 @@ public class ImageDispatch {
         mDiskCache.evictAll();
     }
 
+    public void clearMemoryCache() {
+        mMemoryCache.evictAll();
+    }
+
     public void clearCache(String url) {
         String key = Md5Utils.md5(url);
         mMemoryCache.remove(key);

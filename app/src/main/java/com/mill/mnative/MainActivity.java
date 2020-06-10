@@ -63,7 +63,6 @@ public class MainActivity extends Activity {
         ImageLoaderImp.getInstance().setImageUrl((ImageView) findViewById(R.id.iv2), "https://img95.699pic.com/photo/40011/0709.jpg_wh860.jpg");
         ImageLoaderImp.getInstance().setImageUrl((ImageView) findViewById(R.id.iv2), "https://upfile2.asqql.com/upfile/2009pasdfasdfic2009s305985-ts/gif_spic/2019-12/2019122712445225545.gif");
 
-
         DownloadMgr.getInstance().pauseDownload(id);
 
         lv = findViewById(R.id.lv);
