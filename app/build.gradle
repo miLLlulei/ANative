@@ -8,46 +8,46 @@ android {
         applicationId "com.mill.mnative"
         minSdkVersion MIN_SDK_VERSION as int
         targetSdkVersion TARGET_SDK_VERSION as int
-        versionCode 1
-        versionName "1.0"
+        versionCode 10000
+        versionName "1.0.0"
 
         ndk {
             abiFilters "armeabi-v7a"
         }
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    signingConfigs {
+//        release { storeFile file('debug.keystore') }
+        debug { storeFile file('debug.keystore') }
     }
 
     buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+
         release {
-            minifyEnabled false
+            minifyEnabled true
+            useProguard true
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
 
+    compileOptions {
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
+    }
 }
-
-//apply plugin: 'replugin-host-gradle'
-//repluginHostConfig {
-//    useAppCompat = false
-//    persistentName = ":core"
-//    countTranslucentStandard 6
-//    countTranslucentSingleTask 3
-//    countTranslucentSingleTop 3
-//    countTranslucentSingleInstance 3
-//}
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.5.4'
     releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
     debugImplementation 'com.github.markzhai:blockcanary-android:1.5.0'
     releaseImplementation 'com.github.markzhai:blockcanary-no-op:1.5.0'
 
-//    implementation "com.qihoo360.replugin:replugin-host-lib:$REPLUGIN_VERSION"
 
     implementation project(":download")
     implementation project(":image_load")

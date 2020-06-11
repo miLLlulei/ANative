@@ -4,7 +4,6 @@ package com.mill.mnative;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import com.github.moduth.blockcanary.BlockCanary;
 import com.github.moduth.blockcanary.BlockCanaryContext;
@@ -19,7 +18,6 @@ import java.io.File;
 import java.io.FileReader;
 
 public class BaseApplication extends Application {
-
     private static final String TAG = BaseApplication.class.getName();
 
     @Override
