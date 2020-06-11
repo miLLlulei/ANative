@@ -132,7 +132,8 @@ public class ConnectRunnable implements Runnable {
             }
         } catch (Exception e) {
             if (HttpClientImp.isDebug) {
-                Log.i(HttpClientImp.TAG, "response error" + e.toString());
+                Log.i(HttpClientImp.TAG, "response error " + e.toString());
+                e.printStackTrace();
             }
             mDispatch.notifyFail(mRequest, "net error" + e.toString());
         } finally {

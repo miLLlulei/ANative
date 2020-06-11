@@ -69,8 +69,8 @@ public class BaseDownloadTask implements Runnable {
             return;
         }
         mTotalBytes = getTotalLength(mUrl);
-        if (mTotalBytes <= 10 * 1024 * 1024) {
-            // 小于 10m 的文件，不用 分块下载；
+        if (mTotalBytes <= FileDownloader.CHUNK_MIN_FILE_SIZE) {
+            // 小于 CHUNK_MIN_FILE_SIZE 的文件，不用 分块下载；
             synchronized (BaseDownloadTask.class) {
                 BaseChunkTask chunkTask = new BaseChunkTask(mUrl, mSavePath, 0, 0, mForceReDownload, mAutoRetryCountMax, mHeader, new FileDownloadSampleListener() {
                     @Override

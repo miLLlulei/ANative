@@ -9,6 +9,7 @@ import com.github.moduth.blockcanary.BlockCanary;
 import com.github.moduth.blockcanary.BlockCanaryContext;
 import com.mill.mnative.download.DownloadMgr;
 import com.mill.mnative.imageload.ImageLoaderImp;
+import com.mill.mnative.net.HttpClientImp;
 import com.mill.mnative.utils.ContextUtils;
 import com.mill.mnative.utils.LogUtils;
 import com.squareup.leakcanary.LeakCanary;
@@ -33,9 +34,11 @@ public class BaseApplication extends Application {
         super.onCreate();
         String processName = getProcessName();
         if (getPackageName().equals(processName)) {
-            startService(new Intent(this, CoreService.class));
+            HttpClientImp.getInstance().init(this, LogUtils.isDebug());
             DownloadMgr.getInstance().init(this, LogUtils.isDebug());
-            ImageLoaderImp.getInstance().init(this);
+            ImageLoaderImp.getInstance().init(this, LogUtils.isDebug());
+
+            startService(new Intent(this, CoreService.class));
         }
     }
 

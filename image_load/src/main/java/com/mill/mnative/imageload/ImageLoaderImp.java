@@ -9,6 +9,7 @@ import com.mill.mnative.imageload.resource.DefaultImageHeaderParser;
 import com.mill.mnative.imageload.resource.ImageHeaderParser;
 import com.mill.mnative.imageload.resource.Resource;
 import com.mill.mnative.utils.BitmapUtils;
+import com.mill.mnative.utils.ContextUtils;
 import com.mill.mnative.utils.FileUtils;
 import com.mill.mnative.utils.LooperHandlerThread;
 
@@ -21,10 +22,9 @@ import pl.droidsonroids.gif.GifDrawable;
 
 public class ImageLoaderImp {
     public static final String TAG = "ImageLoaderImp";
-    public static final boolean isDebug = true;
+    public static boolean isDebug = true;
 
     private static volatile ImageLoaderImp sInstance;
-    private Context mContext;
     private ImageDispatch mDispatch;
 
     public static ImageLoaderImp getInstance() {
@@ -39,36 +39,30 @@ public class ImageLoaderImp {
     }
 
     private ImageLoaderImp() {
-    }
+        ExecutorService mExecutor = Executors.newFixedThreadPool(3, new ThreadFactory() {
+            private final AtomicInteger mThreadId = new AtomicInteger(0);
 
-    public void init(Context context) {
-        if (mContext == null) {
-            this.mContext = context.getApplicationContext();
-            ExecutorService mExecutor = Executors.newFixedThreadPool(3, new ThreadFactory() {
-                private final AtomicInteger mThreadId = new AtomicInteger(0);
-
-                @Override
-                public Thread newThread(Runnable r) {
-                    Thread t = new Thread(r);
-                    t.setName(String.format("Mn_imageload_%d", this.mThreadId.getAndIncrement()));
-                    t.setPriority(Thread.NORM_PRIORITY);
-                    return t;
-                }
-            });
-            DiskCache mDiskCache = new DiskCache(mContext, ImageLoadConfig.MAX_DISK_SIZE);
-            int maxCache = (int) (Runtime.getRuntime().maxMemory());
-            int cacheSize = maxCache / 8;
-            MemoryCache mMemoryCache = new MemoryCache(cacheSize);
-            if (ImageLoaderImp.isDebug) {
-                Log.i(ImageLoaderImp.TAG, "MemoryCache size: " + FileUtils.formatFileSize(cacheSize) + " DiskCache size: " + FileUtils.formatFileSize(ImageLoadConfig.MAX_DISK_SIZE));
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r);
+                t.setName(String.format("Mn_imageload_%d", this.mThreadId.getAndIncrement()));
+                t.setPriority(Thread.NORM_PRIORITY);
+                return t;
             }
-            ImageHeaderParser mHeaderParser = new DefaultImageHeaderParser();
-            mDispatch = new ImageDispatch(mExecutor, mMemoryCache, mDiskCache, mHeaderParser);
+        });
+        DiskCache mDiskCache = new DiskCache(ContextUtils.getApplicationContext(), ImageLoadConfig.MAX_DISK_SIZE);
+        int maxCache = (int) (Runtime.getRuntime().maxMemory());
+        int cacheSize = maxCache / 8;
+        MemoryCache mMemoryCache = new MemoryCache(cacheSize);
+        if (ImageLoaderImp.isDebug) {
+            Log.i(ImageLoaderImp.TAG, "MemoryCache size: " + FileUtils.formatFileSize(cacheSize) + " DiskCache size: " + FileUtils.formatFileSize(ImageLoadConfig.MAX_DISK_SIZE));
         }
+        ImageHeaderParser mHeaderParser = new DefaultImageHeaderParser();
+        mDispatch = new ImageDispatch(mExecutor, mMemoryCache, mDiskCache, mHeaderParser);
     }
 
-    public Context getAppContext() {
-        return this.mContext;
+    public void init(Context context, boolean debug) {
+        isDebug = debug;
     }
 
     public void setImageUrl(final ImageView imageView, final String url) {

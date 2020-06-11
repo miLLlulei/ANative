@@ -1,5 +1,10 @@
 package com.mill.mnative.net;
 
+import android.content.Context;
+import android.util.Log;
+
+import com.mill.mnative.utils.FileUtils;
+
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -10,7 +15,7 @@ public class HttpClientImp {
     public static final String TAG = "HttpClientImp";
 
     public static volatile HttpClientImp sInstance;
-    public static boolean isDebug = BuildConfig.DEBUG;
+    public static boolean isDebug = true;
     public ConnectDispatch mDispatch;
 
     public static HttpClientImp getInstance() {
@@ -22,6 +27,10 @@ public class HttpClientImp {
             }
         }
         return sInstance;
+    }
+
+    public void init(Context context, boolean debug) {
+        isDebug = debug;
     }
 
     private HttpClientImp() {

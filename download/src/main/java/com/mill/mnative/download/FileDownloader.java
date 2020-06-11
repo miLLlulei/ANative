@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class FileDownloader {
     public static final int CHUNK_COUNT = 3;
+    public static final int CHUNK_MIN_FILE_SIZE = 10 * 1024 * 1024;
     private ThreadPoolExecutor CHUNK_EXECUTOR = new ThreadPoolExecutor(CHUNK_COUNT, CHUNK_COUNT, 1, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>(128), new ThreadFactory() {
         private final AtomicInteger mCount = new AtomicInteger(1);
 
