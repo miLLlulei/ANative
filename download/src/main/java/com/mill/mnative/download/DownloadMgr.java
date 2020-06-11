@@ -24,7 +24,7 @@ public class DownloadMgr implements IDownloadInfoMgr, DownloadDb.LoadDownloadDbF
     public static final int STATUS_DB_LOADALL_SUC = -6;
     public static final int AUTO_RETRY_COUNT_MAX = 3;
 
-    private static DownloadMgr mInstance;
+    private volatile static DownloadMgr mInstance;
 
     public static boolean DEBUG = true;
     private LooperHandlerThread dbThread = LooperHandlerThread.getGlobalThread();
@@ -65,7 +65,7 @@ public class DownloadMgr implements IDownloadInfoMgr, DownloadDb.LoadDownloadDbF
                             @Override
                             public void run() {
                                 if (DownloadMgr.DEBUG) {
-                                    Log.d(DownloadMgr.TAG, " " + mapDownloadResInfo.size() + " " + FileDownloader.getImpl().getTaskSize());
+                                    Log.d(DownloadMgr.TAG, " " + mapDownloadResInfo.size() + " " + DownloadGlobalObserver.getInstance().getObserverSize() + " " + FileDownloader.getImpl().getTaskSize());
                                     ThreadUtils.postOnUiThread(this, 5000);
                                 }
                             }
@@ -116,7 +116,7 @@ public class DownloadMgr implements IDownloadInfoMgr, DownloadDb.LoadDownloadDbF
         if (mapDownloadResInfo.get(taskId) != null) {
             info = mapDownloadResInfo.get(taskId);
         }
-        if (info.firstDownloadTime != 0) {
+        if (info.firstDownloadTime == 0) {
             info.firstDownloadTime = System.currentTimeMillis();
         }
         mapDownloadResInfo.put(info.taskId, info);

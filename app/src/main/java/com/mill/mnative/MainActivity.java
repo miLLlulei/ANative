@@ -14,9 +14,11 @@ import android.widget.TextView;
 import com.mill.mnative.download.BaseDownloadBean;
 import com.mill.mnative.download.BaseDownloadTask;
 import com.mill.mnative.download.DownloadMgr;
+import com.mill.mnative.download.DownloadObserver;
 import com.mill.mnative.imageload.ImageLoaderImp;
 import com.mill.mnative.net.HttpClientImp;
 import com.mill.mnative.net.NetCallback;
+import com.mill.mnative.utils.LogUtils;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -26,7 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements DownloadObserver {
     int page = 1;
     ListView lv;
     BaseAdapter adapter;
@@ -36,6 +38,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        DownloadMgr.getInstance().addObserver(this);
 
         BaseDownloadBean info = null;
         String id = null;
@@ -64,6 +67,7 @@ public class MainActivity extends Activity {
         ImageLoaderImp.getInstance().setImageUrl((ImageView) findViewById(R.id.iv2), "https://upfile2.asqql.com/upfile/2009pasdfasdfic2009s305985-ts/gif_spic/2019-12/2019122712445225545.gif");
 
         DownloadMgr.getInstance().pauseDownload(id);
+
 
         lv = findViewById(R.id.lv);
         lv.postDelayed(new Runnable() {
@@ -162,7 +166,13 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    public void onDownloadChange(BaseDownloadBean info) {
+        LogUtils.d("DownloadGlobalObserver", info.toString());
+    }
+
+    @Override
     protected void onDestroy() {
+        DownloadMgr.getInstance().deleteObserver(this);
         ImageLoaderImp.getInstance().cancel(this);
         HttpClientImp.getInstance().cancel(this);
 //        ImageLoaderImp.getInstance().clearAllCache();

@@ -2,6 +2,7 @@ package com.mill.mnative.download;
 
 import com.mill.mnative.utils.FileUtils;
 import com.mill.mnative.utils.LogUtils;
+import com.mill.mnative.utils.ThreadUtils;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -10,8 +11,7 @@ import java.util.List;
 
 public class DownloadGlobalObserver extends FileDownloadSampleListener {
     public static final String TAG = DownloadGlobalObserver.class.getSimpleName();
-
-    private static DownloadGlobalObserver mInstance;
+    private volatile static DownloadGlobalObserver mInstance;
 
     private DownloadGlobalObserver() {
     }
@@ -41,18 +41,20 @@ public class DownloadGlobalObserver extends FileDownloadSampleListener {
         observers.remove(observer);
     }
 
+    public int getObserverSize() {
+        return observers.size();
+    }
+
     public void notifyObservers(final BaseDownloadBean info) {
-        Iterator<DownloadObserver> iterator = observers.iterator();
-        while (iterator.hasNext()) {
-            try {
-                DownloadObserver listener = iterator.next();
-                listener.onDownloadChange(info);
-            } catch (Exception e) {
-                if (LogUtils.isDebug()) {
-                    LogUtils.e(TAG, "notifyObservers  " + info + " error: " + e);
+        if (!observers.isEmpty()) {
+            ThreadUtils.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    for (DownloadObserver listener : observers) {
+                        listener.onDownloadChange(info);
+                    }
                 }
-                e.printStackTrace();
-            }
+            });
         }
     }
 

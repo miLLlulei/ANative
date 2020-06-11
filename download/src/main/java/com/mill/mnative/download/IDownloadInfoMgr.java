@@ -24,6 +24,10 @@ public interface IDownloadInfoMgr {
 
     public Map<String, BaseDownloadBean> getDownloadInfos();
 
+    /**
+     * 添加监听
+     * 记得 deleteObserver，否则可能内存泄漏
+     */
     public void addObserver(DownloadObserver observer);
 
     public void deleteObserver(DownloadObserver observer);
