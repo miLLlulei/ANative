@@ -3,6 +3,14 @@
 # 允许调整访问修饰符，最大程度的进行混淆
 -allowaccessmodification
 
+# litepal 数据库
+-keep class org.litepal.** { *; }
+-keep class * extends org.litepal.crud.DataSupport { *; }
+-keep class * extends org.litepal.crud.LitePalSupport { *; }
+
+# pdf 阅读器
+-keep class com.shockwave.**
+
 #Flutter 相关的类 不混淆
 -dontwarn io.flutter.**
 -dontwarn android.**

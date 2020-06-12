@@ -4,3 +4,9 @@ include ':utils'
 include ':net'
 include ':image_load'
 include ':download'
+include ':commonui'
+include ':ad'
+include ':reader'
+
+//include ':treader'
+//project(':treader').projectDir = new File(settingsDir, 'treader/app')

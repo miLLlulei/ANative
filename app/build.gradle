@@ -49,7 +49,17 @@ dependencies {
     debugImplementation 'com.github.markzhai:blockcanary-android:1.5.0'
     releaseImplementation 'com.github.markzhai:blockcanary-no-op:1.5.0'
 
+    implementation 'com.github.barteksc:android-pdf-viewer:2.8.2'
 
+    implementation project(":reader")
+    implementation "com.android.support:appcompat-v7:$SUPPORT_LIBRARY_VERSION"
+    implementation "com.android.support:support-v4:$SUPPORT_LIBRARY_VERSION"
+    implementation "com.android.support:design:$SUPPORT_LIBRARY_VERSION"
+    implementation 'org.litepal.android:core:1.3.1'
+    implementation 'com.astuetz:pagerslidingtabstrip:1.0.1'
+
+    implementation project(":commonui")
+    implementation project(":ad")
     implementation project(":download")
     implementation project(":image_load")
     implementation project(":net")

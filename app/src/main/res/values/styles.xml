@@ -1,7 +1,11 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="">
+    <style name="MainTheme" parent="android:Theme.Holo.Light">
+
+    </style>
+
+    <style name="SplashTheme" parent="android:Theme.Holo.Light.NoActionBar">
 
     </style>
 

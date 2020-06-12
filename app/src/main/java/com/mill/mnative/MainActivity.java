@@ -1,187 +1,82 @@
 package com.mill.mnative;
 
+import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
 
-import com.mill.mnative.download.BaseDownloadBean;
-import com.mill.mnative.download.BaseDownloadTask;
-import com.mill.mnative.download.DownloadMgr;
-import com.mill.mnative.download.DownloadObserver;
-import com.mill.mnative.imageload.ImageLoaderImp;
-import com.mill.mnative.net.HttpClientImp;
-import com.mill.mnative.net.NetCallback;
-import com.mill.mnative.utils.LogUtils;
+import com.mill.mnative.reader.activity.ReadActivity;
+import com.mill.mnative.reader.db.BookList;
+import com.mill.mnative.reader.util.Fileutil;
+import com.mill.mnative.utils.MagicFileChooser;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.litepal.crud.DataSupport;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.io.File;
 import java.util.List;
-import java.util.Map;
 
-public class MainActivity extends Activity implements DownloadObserver {
-    int page = 1;
-    ListView lv;
-    BaseAdapter adapter;
-    List<ImageBean> data = new ArrayList<>();
+public class MainActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        DownloadMgr.getInstance().addObserver(this);
 
-        BaseDownloadBean info = null;
-        String id = null;
-        info = new BaseDownloadBean();
-        info.downloadUrl = "http://upload.test1.mobilem.360.cn/2020521/app05210942.apk";
-        info.fouceReDownload = false;
-        DownloadMgr.getInstance().startDownload(info);
-
-        info = new BaseDownloadBean();
-        info.downloadUrl = "http://upload.test1.mobilem.360.cn/2020521/app05210942.apk";
-        info.fouceReDownload = true;
-        id = DownloadMgr.getInstance().startDownload(info);
-
-        info = new BaseDownloadBean();
-        info.downloadUrl = "http://upload.test1.mobilem.360.cn/2020513/app-release_flutterso.apk";
-        info.fouceReDownload = false;
-        DownloadMgr.getInstance().startDownload(info);
-
-        info = new BaseDownloadBean();
-        info.downloadUrl = "http://upload.test1.mobilem.360.cn/2020513/app-release_flutterso.apk";
-        info.fouceReDownload = true;
-        DownloadMgr.getInstance().startDownload(info);
-
-        ImageLoaderImp.getInstance().setImageUrl((ImageView) findViewById(R.id.iv), "https://img95.699pic.com/photo/50055/5642.jpg_wh860.jpg");
-        ImageLoaderImp.getInstance().setImageUrl((ImageView) findViewById(R.id.iv2), "https://img95.699pic.com/photo/40011/0709.jpg_wh860.jpg");
-        ImageLoaderImp.getInstance().setImageUrl((ImageView) findViewById(R.id.iv2), "https://upfile2.asqql.com/upfile/2009pasdfasdfic2009s305985-ts/gif_spic/2019-12/2019122712445225545.gif");
-
-        DownloadMgr.getInstance().pauseDownload(id);
-
-
-        lv = findViewById(R.id.lv);
-        lv.postDelayed(new Runnable() {
-            @Override
-            public void run() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE
+                }, 0);
             }
-        }, 1000);
+        }
 
-        lv.setOnScrollListener(new AbsListView.OnScrollListener() {
+        findViewById(R.id.tv_pdf).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onScrollStateChanged(AbsListView view, int scrollState) {
-                if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
-                    if (view.getLastVisiblePosition() == view.getCount() - 1) {
-                        loadData();
-                    }
-                }
-            }
-
-            @Override
-            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-
-            }
-        });
-        lv.setAdapter(adapter = new BaseAdapter() {
-            @Override
-            public int getCount() {
-                return data.size();
-            }
-
-            @Override
-            public Object getItem(int position) {
-                return data.get(position);
-            }
-
-            @Override
-            public long getItemId(int position) {
-                return position;
-            }
-
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                if (convertView == null) {
-                    convertView = View.inflate(MainActivity.this, R.layout.list_item, null);
-                }
-                ImageBean item = data.get(position);
-                TextView tv = convertView.findViewById(R.id.tv);
-                ImageView iv = convertView.findViewById(R.id.iv);
-                tv.setText(item.desc);
-                ImageLoaderImp.getInstance().setImageUrl(iv, item.image);
-                return convertView;
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.setClassName(getPackageName(), PdfViewActivity.class.getName());
+                startActivity(intent);
             }
         });
 
-        loadData();
-    }
-
-    public void loadData() {
-        Map<String, String> params = new HashMap<>();
-        params.put("page", String.valueOf(page));
-        HttpClientImp.getInstance().postAsync(this, "http://test.appapi.joyme.com/Recommend/topic?platform=1", params, new NetCallback() {
+        findViewById(R.id.tv_txt).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onNetSuccess(String response) {
-                page++;
-                try {
-                    JSONObject jo = new JSONObject(response);
-                    JSONArray ja = jo.optJSONObject("data").optJSONArray("detail");
-                    for (int i = 0; i < ja.length(); i++) {
-                        JSONObject djo = ja.getJSONObject(i);
-                        ImageBean bean = new ImageBean();
-                        bean.desc = djo.optJSONObject("user").optString("nick_name");
-                        String summary = djo.optJSONObject("topic").optString("summary");
-                        JSONObject sjo = new JSONObject(summary);
-                        JSONArray sja = sjo.optJSONArray("images");
-                        if (sja != null && sja.length() > 0) {
-                            bean.image = sja.optString(0);
+            public void onClick(View v) {
+                List<BookList> list = DataSupport.findAll(BookList.class);
+                if (list != null && list.size() > 0) {
+                    for (BookList item : list) {
+                        if (new File(item.getBookpath()).exists()) {
+                            ReadActivity.openBook(item, MainActivity.this);
+                            return;
+                        } else {
+                            item.delete();
                         }
-                        if (TextUtils.isEmpty(bean.image)) {
-                            bean.image = sjo.optString("bgimg");
-                        }
-                        if (TextUtils.isEmpty(bean.image)) {
-                            bean.image = djo.optJSONObject("user").optString("face_url");
-                        }
-                        data.add(bean);
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
                 }
-                adapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onNetFail(String error) {
-
+                PdfViewActivity.startFileChooser(MainActivity.this);
             }
         });
     }
 
     @Override
-    public void onDownloadChange(BaseDownloadBean info) {
-        LogUtils.d("DownloadGlobalObserver", info.toString());
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == PdfViewActivity.CHOOSE_FILE_CODE) {
+                File pickFile = MagicFileChooser.getFileFromUri(this, data.getData(), false);
+                BookList bean = new BookList();
+                bean.setBookpath(pickFile.getAbsolutePath());
+                bean.setBookname(Fileutil.getFileNameNoEx(bean.getBookpath()));
+                ReadActivity.openBook(bean, MainActivity.this);
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
     protected void onDestroy() {
-        DownloadMgr.getInstance().deleteObserver(this);
-        ImageLoaderImp.getInstance().cancel(this);
-        HttpClientImp.getInstance().cancel(this);
-//        ImageLoaderImp.getInstance().clearAllCache();
         super.onDestroy();
-    }
-
-
-    class ImageBean {
-        public String desc;
-        public String image;
     }
 }
