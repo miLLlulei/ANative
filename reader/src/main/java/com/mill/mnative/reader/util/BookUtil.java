@@ -201,6 +201,7 @@ public class BookUtil {
             String bufStr = new String(buf);
 //            bufStr = bufStr.replaceAll("\r\n","\r\n\u3000\u3000");
 //            bufStr = bufStr.replaceAll("\u3000\u3000+[ ]*","\u3000\u3000");
+            bufStr = bufStr.replaceAll("[^\r]\n[^\r]", "\r\n"); // 单\n，换成 \r\n
             bufStr = bufStr.replaceAll("\r\n+\\s*", "\r\n\u3000\u3000");
 //            bufStr = bufStr.replaceAll("\r\n[ {0,}]","\r\n\u3000\u3000");
 //            bufStr = bufStr.replaceAll(" ","");
@@ -230,12 +231,15 @@ public class BookUtil {
             index++;
         }
 
-        AsyncTask.execute(new Runnable() {
+        new Thread() {
             @Override
             public void run() {
+                long time = System.currentTimeMillis();
+                Log.d("getChapter", "getChapter start ");
                 getChapter();
+                Log.d("getChapter", "getChapter end " + (System.currentTimeMillis() - time));
             }
-        });
+        }.start();
     }
 
     //获取章节

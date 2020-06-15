@@ -5,6 +5,7 @@
     <color name="colorAccent">#E25754</color>
     <color name="white">#ffffffff</color>
     <color name="transparent">#00000000</color>
+    <color name="list_item_divider">#cccccc</color>
 
 
     <!-- Reader Color -->

@@ -526,6 +526,9 @@ public class ReadActivity extends BaseActivity implements View.OnClickListener {
             mSettingDialog.show();
         } else if (id == R.id.bookpop_bottom) {
         } else if (id == R.id.rl_bottom) {
+        } else if (id == R.id.tv_directory) {
+            Intent intent = new Intent(ReadActivity.this, MarkActivity.class);
+            startActivity(intent);
         }
     }
 }
